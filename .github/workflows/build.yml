@@ -17,7 +17,7 @@ on:
         default: 'vayu_defconfig'
       KERNEL_HOTFIX:
         description: 'KERNEL_HOTFIX'
-        required: false
+        required: true
         default: 'N/A'
 
 jobs:
