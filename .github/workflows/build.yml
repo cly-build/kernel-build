@@ -1,4 +1,4 @@
-name: Kernel Build
+name: Rad Build
 
 on:
   workflow_dispatch:
@@ -6,15 +6,15 @@ on:
       KERNEL_REPO:
         description: 'KERNEL_REPO'
         required: true
-        default: 'https://github.com/zainarbani/kernel-mtk'
+        default: 'https://github.com/cly-build/kernel_xiaomi_vayu.git'
       KERNEL_BRANCH:
         description: 'KERNEL_BRANCH'
         required: true
-        default: 's'
+        default: '13'
       KERNEL_DEFCONFIG:
         description: 'KERNEL_DEFCONFIG'
         required: true
-        default: 'rosemary_defconfig'
+        default: 'vayu_defconfig'
       KERNEL_HOTFIX:
         description: 'KERNEL_HOTFIX'
         required: false
@@ -23,7 +23,7 @@ on:
 jobs:
   build:
     if: github.event.repository.owner.id == github.event.sender.id
-    runs-on: buildjet-8vcpu-ubuntu-2204
+    runs-on: self-hosted
     permissions:
       contents: write
     steps:
@@ -32,8 +32,8 @@ jobs:
       run: |
         sudo apt update  &> /dev/null
         sudo apt -y install gawk aria2 git ccache automake flex lzop bison gperf build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libxml2-utils bzip2 libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools pngcrush schedtool dpkg-dev liblz4-tool make optipng maven libssl-dev pwgen libswitch-perl policycoreutils minicom libxml-sax-base-perl libxml-simple-perl bc libc6-dev-i386 lib32ncurses5-dev libx11-dev lib32z-dev libgl1-mesa-dev xsltproc unzip device-tree-compiler python2 python3 &> /dev/null
-        git config --global user.name "bot"
-        git config --global user.email "bot@email.com"
+        git config --global user.name "clyfly"
+        git config --global user.email "denwahgenshin@gmail.com"
         mkdir -p $GITHUB_WORKSPACE/project
           
     - name: Prepare TC
@@ -47,7 +47,7 @@ jobs:
       run: |
         cd $GITHUB_WORKSPACE/project
         git clone -b ${{ github.event.inputs.KERNEL_BRANCH }} ${{ github.event.inputs.KERNEL_REPO }} linux --recurse-submodules --depth=1 &> /dev/null
-        git clone -b master https://github.com/zainarbani/AnyKernel3 AnyKernel3 --depth=1 &> /dev/null
+        git clone -b master https://github.com/clyfly/AnyKernel3.git AnyKernel3 --depth=1 &> /dev/null
 
     - name: Building Kernel
       run: |
@@ -59,10 +59,10 @@ jobs:
         echo "KERNEL_VER=$(make kernelversion)" >> $GITHUB_ENV
         echo "CLANG_VER=$(clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g')" >> $GITHUB_ENV
         export ARCH=arm64
-        export KBUILD_BUILD_HOST=builder
-        export KBUILD_BUILD_USER=zainarbani
+        export KBUILD_BUILD_HOST=radinka
+        export KBUILD_BUILD_USER=yourwaifu
         export KBUILD_COMPILER_STRING="$(clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
-        echo "-OverHeat-LTO" > localversion
+        echo "-LangKernel-Ksu" > localversion
         make O=out ARCH=$ARCH ${{ github.event.inputs.KERNEL_DEFCONFIG }}
         make -j$(nproc --all) O=out CC=clang ARCH=$ARCH CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- LLVM=1 LLVM_IAS=1 LD=ld.lld NM=llvm-nm AR=llvm-ar OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump
         cp out/arch/arm64/boot/Image.gz-dtb $GITHUB_WORKSPACE/project/Image.gz-dtb
