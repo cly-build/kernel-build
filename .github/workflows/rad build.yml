@@ -6,20 +6,20 @@ on:
       KERNEL_REPO:
         description: 'KERNEL_REPO'
         required: true
-        default: 'https://github.com/cly-build/kernel_xiaomi_rosemary.git'
+        default: 'https://github.com/cly-build/kernel_xiaomi_vayu.git'
       KERNEL_BRANCH:
         description: 'KERNEL_BRANCH'
         required: true
-        default: 'rad-test'
+        default: 'tiramisu'
       KERNEL_DEFCONFIG:
         description: 'KERNEL_DEFCONFIG'
         required: true
-        default: 'rosemary_defconfig'
+        default: 'vayu_defconfig'
 
 jobs:
   build:
     if: github.event.repository.owner.id == github.event.sender.id
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
@@ -35,7 +35,7 @@ jobs:
     - name: Prepare TC 💦
       run: |
         mkdir -p $GITHUB_WORKSPACE/project/clang
-        CLANG_URL=$(curl -Ls https://raw.githubusercontent.com/ZyCromerZ/Clang/main/Clang-14-link.txt)
+        CLANG_URL=$(curl -Ls https://raw.githubusercontent.com/ZyCromerZ/Clang/main/Clang-main-link.txt)
         aria2c $CLANG_URL &> /dev/null
         tar -C $GITHUB_WORKSPACE/project/clang/ -zxf ${CLANG_URL##*/}
 
@@ -97,7 +97,26 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Send Build Log to Telegram 💯
-      if: always()  # This step will run even if previous steps fail
-      run: |
-        curl -F "document=@$GITHUB_WORKSPACE/buildlog.txt" "https://api.telegram.org/bot${{ secrets.BOT_TOKEN }}/sendDocument?chat_id=${{ secrets.CHAT_ID }}"
+    - name: Update TG
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.CHAT_ID }}
+        token: ${{ secrets.BOT_TOKEN }}
+        format: html
+        disable_web_page_preview: true
+        message: |
+          <b>RadinkaBuild-Kernel Update</b>
+
+          <b>Build Date: </b>${{ env.BUILD_DATE }}
+          
+          <a href="https://github.com/${{ github.repository }}/releases/tag/${{ env.BUILD_DATE }}">Download</a>
+          
+          <a href="${{ github.event.inputs.KERNEL_REPO }}/commits/${{ github.event.inputs.KERNEL_BRANCH }}">Changelogs</a>
+
+          <b>Hotfix:</b>
+          ${{ github.event.inputs.KERNEL_HOTFIX }}
+
+          <b>Config: </b>${{ github.event.inputs.KERNEL_DEFCONFIG }}
+          <b>Kernel Ver: </b>${{ env.KERNEL_VER }}
+          <b>Clang Ver: </b>${{ env.CLANG_VER }}
+          <b>Maintainer: </b>@Aradinkaelw
