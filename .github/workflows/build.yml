@@ -78,16 +78,16 @@ jobs:
       run: |
         cd $GITHUB_WORKSPACE/project/AnyKernel3
         cp $GITHUB_WORKSPACE/project/Image.gz-dtb Image.gz-dtb
-        zip -r9 $GITHUB_WORKSPACE/project/OverHeat-dev.zip -- *
+        zip -r9 $GITHUB_WORKSPACE/project/RadVayu-RL.zip -- *
         cp $GITHUB_WORKSPACE/project/Image.gz-dtb-ksu Image.gz-dtb
-        zip -r9 $GITHUB_WORKSPACE/project/OverHeat-dev-ksu.zip -- *
+        zip -r9 $GITHUB_WORKSPACE/project/RadVayu-RL-ksu.zip -- *
         
     - name: Upload Release
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          ${{ github.workspace }}/project/OverHeat-dev.zip
-          ${{ github.workspace }}/project/OverHeat-dev-ksu.zip
+          ${{ github.workspace }}/project/RadVayu-RL.zip
+          ${{ github.workspace }}/project/RadVayu-RL-ksu.zip
         name: OverHeat-${{ env.BUILD_DATE }}
         tag_name: ${{ env.BUILD_DATE }}
         body: |
@@ -119,4 +119,4 @@ jobs:
           <b>Config: </b>${{ github.event.inputs.KERNEL_DEFCONFIG }}
           <b>Kernel Ver: </b>${{ env.KERNEL_VER }}
           <b>Clang Ver: </b>${{ env.CLANG_VER }}
-          <b>Maintainer: </b>@AnotherZain
+          <b>Maintainer: </b>@radinkaelw
